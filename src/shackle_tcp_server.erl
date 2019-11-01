@@ -45,7 +45,6 @@ start_link(Name, Opts) ->
 
 init(Name, Parent, Opts) ->
     {PoolName, Index, Client, ClientOptions} = Opts,
-    self() ! ?MSG_CONNECT,
     Id = {PoolName, Index},
     ok = shackle_backlog:new(Id),
 
@@ -57,7 +56,7 @@ init(Name, Parent, Opts) ->
     SocketOptions = ?LOOKUP(socket_options, ClientOptions,
         ?DEFAULT_SOCKET_OPTS),
 
-    {ok, {#state {
+    handle_msg(?MSG_CONNECT, {#state {
         client = Client,
         id = Id,
         init_options = InitOptions,
@@ -68,7 +67,7 @@ init(Name, Parent, Opts) ->
         port = Port,
         reconnect_state = ReconnectState,
         socket_options = SocketOptions
-    }, undefined}}.
+    }, undefined}).
 
 -spec handle_msg(term(), {state(), client_state()}) ->
     {ok, term()}.
